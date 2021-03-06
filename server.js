@@ -1,36 +1,35 @@
 const express = require('express');
 const app = express();
-const notes = require('./db/db.json');
 const PORT = process.env.PORT || 3001;
 const path = require('path');
+const fs = require('fs');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-function createNewNote(body, notesArr) {
-    // our function's main code will go here!
-    const note = body;
-    notesArr.push(note);
-    console.log(notesArr);
-    // return finished code to post route for response
-    return note;
-};
-
-// app.get('/notes', (req, res) => {
-//     res.json(notes);
-// });
-
-app.post('/notes', (req, res) => {
-    const newNote = createNewNote(req.body, notes);
-    res.json(notes);
-});
-
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "./public/index.html"));
 });
+
 app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "./public/notes.html"));
+});
+
+app.get("/api/notes", function(req, res){
+    let notesSaved = fs.readFileSync(path.join(__dirname, "./db/db.json"))
+    notesSaved = JSON.parse(notesSaved)
+    res.json(notesSaved)
+})
+
+app.post('/api/notes', (req, res) => {
+    let notesSaved = JSON.parse(fs.readFileSync("./db/db.json"));
+    let noteID = (notesSaved.length).toString();
+    let noteNew = req.body;
+    noteNew.id = noteID;
+    notesSaved.push(noteNew);
+    fs.writeFileSync("./db/db.json", JSON.stringify(notesSaved));
+    res.json(notesSaved);
 });
 
 app.listen(PORT, () => {
