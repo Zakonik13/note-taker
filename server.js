@@ -17,10 +17,21 @@ app.get("/notes", (req, res) => {
 });
 
 app.get("/api/notes", function(req, res){
-    let notesSaved = fs.readFileSync(path.join(__dirname, "./db/db.json"))
-    notesSaved = JSON.parse(notesSaved)
-    res.json(notesSaved)
-})
+    let notesSaved = fs.readFileSync(path.join(__dirname, "./db/db.json"));
+    notesSaved = JSON.parse(notesSaved);
+    res.json(notesSaved);
+});
+
+app.delete("/api/notes/:id", (req, res) => {
+    let notesSaved = fs.readFileSync(path.join(__dirname, "./db/db.json"));
+    notesSaved = JSON.parse(notesSaved);
+    let noteID = req.params.id;
+    notesSaved = notesSaved.filter(thisNote => {
+        return thisNote.id != noteID;
+    });
+    fs.writeFileSync("./db/db.json", JSON.stringify(notesSaved));
+    res.json(notesSaved);
+});
 
 app.post('/api/notes', (req, res) => {
     let notesSaved = JSON.parse(fs.readFileSync("./db/db.json"));
